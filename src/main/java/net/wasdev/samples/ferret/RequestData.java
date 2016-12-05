@@ -15,15 +15,15 @@
  *******************************************************************************/
 package net.wasdev.samples.ferret;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 
 public final class RequestData {
     private final String method;
@@ -53,6 +53,7 @@ public final class RequestData {
     private final Map<String, List<String>> requestHeaders;
     private final Map<String, String> cookies;
     private final Map<String, String> requestAttributes;
+    private final Map<String, String> sessionAttributes;
 
     public RequestData(final HttpServletRequest request) {
         method = request.getMethod();
@@ -82,6 +83,7 @@ public final class RequestData {
         requestHeaders = getRequestHeaders(request);
         cookies = getCookies(request.getCookies());
         requestAttributes = getRequestAttributes(request);
+        sessionAttributes = getSessionAttributes(request);
     }
 
     private Map<String, List<String>> getRequestHeaders(final HttpServletRequest httpServletRequest) {
@@ -94,6 +96,20 @@ public final class RequestData {
         return headers;
     }
 
+    private Map<String, String> getSessionAttributes(final HttpServletRequest httpServletRequest) {
+        HttpSession session = httpServletRequest.getSession(false);
+        final List<String> attributeNames = Collections.list(session.getAttributeNames());
+        final Map<String, String> attributes = new TreeMap<String, String>();
+        for (final String name : attributeNames) {
+            final Object attribute = session.getAttribute(name);
+            if (attribute != null) {
+                attributes.put(name, attribute.toString());
+            } else {
+                attributes.put(name, "");
+            }
+        }
+        return attributes;
+    }
     private Map<String, String> getRequestAttributes(final HttpServletRequest httpServletRequest) {
         final List<String> attributeNames = Collections.list(httpServletRequest.getAttributeNames());
         final Map<String, String> attributes = new TreeMap<String, String>();
@@ -239,7 +255,8 @@ public final class RequestData {
                 + "</p> preferredClientLocale = " + preferredClientLocale + "</p> allClientLocales = "
                 + allClientLocales + "</p> contextPath = " + contextPath + "</p> userPrincipal = " + userPrincipal
                 + "</p> requestHeaders = " + requestHeaders + "</p> cookies = " + cookies
-                + "</p> requestAttributes = " + requestAttributes;
+                + "</p> requestAttributes = " + requestAttributes
+                + "</p> sessionAttributes = " + sessionAttributes;
     }
 
     public Map<String, Object> getAsMap() {
@@ -251,6 +268,7 @@ public final class RequestData {
         map.put("userPrincipal", userPrincipal);
         map.put("requestHeaders", requestHeaders);
         map.put("requestAttributes", requestAttributes);
+        map.put("sessionAttributes", sessionAttributes);
         map.put("cookies", cookies);
         map.put("method", method);
         map.put("uri", uri);

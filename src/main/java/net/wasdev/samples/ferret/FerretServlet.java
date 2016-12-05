@@ -15,20 +15,20 @@
  *******************************************************************************/
 package net.wasdev.samples.ferret;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Map;
-
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import net.wasdev.samples.ferret.html.Element;
 import net.wasdev.samples.ferret.html.Element.ElementType;
 import net.wasdev.samples.ferret.html.Page;
 import net.wasdev.samples.ferret.html.Table;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Date;
+import java.util.Map;
 
 public final class FerretServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -58,6 +58,11 @@ public final class FerretServlet extends HttpServlet {
     }
 
     private FerretData getFerretData(final HttpServletRequest httpServletRequest) {
+
+        HttpSession session = httpServletRequest.getSession(true);
+
+        session.setAttribute("getFerretDataAt", new Date());
+
         return new FerretData(getServletConfig(), getServletContext(), httpServletRequest);
     }
 
