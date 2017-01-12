@@ -15,15 +15,14 @@
  *******************************************************************************/
 package net.wasdev.samples.ferret;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 
 public final class FerretData {
 
@@ -31,6 +30,7 @@ public final class FerretData {
     private final String servletName;
     private final RequestData requestData;
     private final Map<String, String> servletContextAttributes;
+    private final Map<String, String> ferretSpecificEnvironment;
 
     public FerretData(final ServletConfig servletConfig, final ServletContext servletContext,
             final HttpServletRequest httpServletRequest) {
@@ -39,6 +39,32 @@ public final class FerretData {
         requestData = new RequestData(httpServletRequest);
 
         servletContextAttributes = getServletContextAttributes(servletContext);
+
+        ferretSpecificEnvironment = getFerretSpecificEnvironment("sample_ferret");
+    }
+
+    private Map<String, String> getFerretSpecificEnvironment(String environmentFilterPrefix) {
+
+        Map<String, String> ferretSpecificEnvironment = new HashMap<>();
+
+        Map<String, String> environment = System.getenv();
+
+        for (Map.Entry<String, String> entry : environment.entrySet()) {
+
+            String key = entry.getKey();
+
+            if (key.toLowerCase().startsWith(environmentFilterPrefix)) {
+
+                String value = entry.getValue();
+
+                if (value != null) {
+                    ferretSpecificEnvironment.put(key, value);
+                }
+            }
+        }
+
+        return ferretSpecificEnvironment;
+
     }
 
     private Map<String, String> getServletContextAttributes(final ServletContext servletContext) {
@@ -83,6 +109,7 @@ public final class FerretData {
         map.put("servletName", servletName);
         map.put("requestData", requestData.getAsMap());
         map.put("servletContextAttributes", servletContextAttributes);
+        map.put("environment", ferretSpecificEnvironment);
         return map;
     }
     
